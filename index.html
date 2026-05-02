@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Traffic Analyzer</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-wrapper">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand">
+                    <div class="logo">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
+                    <div class="brand-text">
+                        <h1>NetWatch</h1>
+                        <span>Traffic Analyzer</span>
+                    </div>
+                </div>
+                <button id="btnThemeToggle" class="theme-toggle" title="Toggle Dark/Light Mode">
+                    <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                    </svg>
+                    <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"/>
+                        <line x1="12" y1="1" x2="12" y2="3"/>
+                        <line x1="12" y1="21" x2="12" y2="23"/>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                        <line x1="1" y1="12" x2="3" y2="12"/>
+                        <line x1="21" y1="12" x2="23" y2="12"/>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                    </svg>
+                </button>
+            </div>
+
+            <nav class="nav-menu">
+                <div class="nav-section">
+                    <span class="nav-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                        Control
+                    </span>
+                    <div class="control-group">
+                        <div class="select-wrapper">
+                            <select id="ifaceSelect" class="iface-dropdown">
+                                <option value="">Select Interface...</option>
+                            </select>
+                            <svg class="select-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                        </div>
+                        <div class="button-row">
+                            <button id="btnBegin" class="btn btn-start">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                                Start
+                            </button>
+                            <button id="btnHalt" class="btn btn-stop" disabled>
+                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h12v12H6z"/></svg>
+                                Stop
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                        Filters
+                    </span>
+                    <div class="filter-group">
+                        <div class="field">
+                            <label>Protocol</label>
+                            <div class="select-wrapper">
+                                <select id="filterProto">
+                                    <option value="">All Protocols</option>
+                                    <option value="TCP">TCP</option>
+                                    <option value="UDP">UDP</option>
+                                    <option value="ICMP">ICMP</option>
+                                </select>
+                                <svg class="select-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+                            </div>
+                        </div>
+                        <div class="field">
+                            <label>Source IP</label>
+                            <input type="text" id="filterSrc" placeholder="">
+                        </div>
+                        <div class="field">
+                            <label>Destination IP</label>
+                            <input type="text" id="filterDst" placeholder="">
+                        </div>
+                        <div class="button-row">
+                            <button id="btnFilter" class="btn btn-filter">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+                                Apply
+                            </button>
+                            <button id="btnReset" class="btn btn-reset">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 12"/></svg>
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Top Status Bar -->
+            <div class="top-status-bar">
+                <div class="status-display">
+                    <div class="status-indicator" id="statusDot"></div>
+                    <span id="statusText">Ready</span>
+                </div>
+                <div class="capture-info">
+                    <span id="captureInterface">No interface selected</span>
+                </div>
+            </div>
+            <!-- Traffic Table -->
+            <section class="table-section">
+                <div class="table-header">
+                    <div class="table-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                            <polyline points="10 9 9 9 8 9"/>
+                        </svg>
+                        <h3>Captured Traffic</h3>
+                    </div>
+                    <span class="record-count" id="recordCount">0 records</span>
+                </div>
+                <div class="table-container">
+                    <table class="traffic-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Time</th>
+                                <th>Source</th>
+                                <th>SPort</th>
+                                <th>Destination</th>
+                                <th>DPort</th>
+                                <th>Proto</th>
+                                <th>Size</th>
+                                <th>Service</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trafficBody">
+                            <tr class="empty-row">
+                                <td colspan="9">
+                                    <div class="empty-message">
+                                        <div class="empty-icon">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                                            </svg>
+                                        </div>
+                                        <p>Click "Start" to begin capturing network traffic</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Activity Log -->
+            <section class="log-section">
+                <div class="log-header">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10 9 9 9 8 9"/>
+                    </svg>
+                    <h3>Activity Log</h3>
+                </div>
+                <div class="log-container" id="activityLog">
+                    <div class="log-entry info">
+                        <span class="log-time" id="initialTime">--:--:--</span>
+                        <span class="log-indicator"></span>
+                        <span class="log-msg">System initialized. Waiting to start...</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
