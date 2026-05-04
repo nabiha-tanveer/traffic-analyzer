@@ -1,4 +1,4 @@
-# NetWatch - Network Traffic Analyzer
+# NetProbe- Network Traffic Analyzer
 
 A real-time network traffic analyzer built with C++ backend and web-based frontend.
 
